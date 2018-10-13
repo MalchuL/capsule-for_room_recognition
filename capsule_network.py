@@ -206,8 +206,9 @@ class CapsuleNet(nn.Module):
         if y is None:
             print(classes.size())
             # In all batches, get the most active capsule.
-            if len(classes.size())==2:
+            if len(classes.size()) != 2:
                 classes= classes.unsqueeze(0)
+            print(classes.size())
             _, max_length_indices = classes.max(dim=1)
             y = Variable(torch.eye(NUM_CLASSES)).cuda().index_select(dim=0, index=max_length_indices.data)
 
