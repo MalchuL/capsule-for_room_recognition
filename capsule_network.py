@@ -201,7 +201,7 @@ class CapsuleNet(nn.Module):
         x = self.digit_capsules(x)
         print(x.size())
         x = x.squeeze()
-        if len(x.size)==2:
+        if len(x.size())==2:
             x=x.unsqueze(1)
         x.transpose(0, 1)
 
