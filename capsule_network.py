@@ -55,6 +55,7 @@ def eval(x):
     with torch.no_grad():
         predicted, _ = model(x)
         print(predicted.size())
+        print(np.argmax(predicted, axis=1))
         return np.argmax(predicted, axis=1)
 
 def softmax(input, dim=1):
