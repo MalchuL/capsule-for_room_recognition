@@ -147,7 +147,8 @@ class CapsuleNet(nn.Module):
         self.Mixed_7c = inception.Mixed_7c
 
         self.conv1 = nn.Conv2d(in_channels=2048, out_channels=1024, kernel_size=3, stride=1)
-        self.conv2 = nn.Conv2d(in_channels=1024, out_channels=256, kernel_size=1, stride=1)
+        self.conv2 = nn.Conv2d(in_channels=1024, out_channels=512, kernel_size=1, stride=1)
+        self.conv3 = nn.Conv2d(in_channels=512, out_channels=256, kernel_size=1, stride=1)
         self.primary_capsules = CapsuleLayer(num_capsules=8, num_route_nodes=-1, in_channels=256, out_channels=32,
                                              kernel_size=3, stride=1)
         self.digit_capsules = CapsuleLayer(num_capsules=NUM_CLASSES, num_route_nodes=512, in_channels=8,
@@ -203,6 +204,7 @@ class CapsuleNet(nn.Module):
         x = self.Mixed_7c(x)
         x = F.selu(self.conv1(x), inplace=True)
         x = F.selu(self.conv2(x), inplace=True)
+        x = F.selu(self.conv3(x), inplace=True)
         x = self.primary_capsules(x)
         x = self.digit_capsules(x)
         print(x.size())
@@ -241,7 +243,7 @@ class CapsuleLoss(nn.Module):
 
 if __name__ == "__main__":
     from torch.autograd import Variable
-    from torch.optim import Adam
+    from torch.optim import RMSprop
     #from tqdm import tqdm
     #import torchnet as tnt
     model = CapsuleNet()
@@ -251,7 +253,7 @@ if __name__ == "__main__":
 
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
-    optimizer = Adam(model.parameters(),lr=1e-6)
+    optimizer = RMSprop(model.parameters(),lr=1e-6)
 
     capsule_loss = CapsuleLoss()
 
