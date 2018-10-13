@@ -55,8 +55,8 @@ def eval(x):
     with torch.no_grad():
         predicted, _ = model(x)
         print(predicted.size())
-        print(np.argmax(predicted, axis=1))
-        return np.argmax(predicted, axis=1)
+        print(np.argmax(predicted, axis=0))
+        return np.argmax(predicted, axis=0)
 
 def softmax(input, dim=1):
     transposed_input = input.transpose(dim, len(input.size()) - 1)
