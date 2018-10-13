@@ -41,7 +41,7 @@ class HackatonDataset(torch.utils.data.Dataset):
 
     def get_classes(self, classname, count_of_choices,X,Y):
         root='./datasets/'+classname+'/'
-        number_of_files = len([item for item in os.listdir(root) if os.path.isfile(os.path.join(root, item))])
+        number_of_files = len([item for item in os.listdir(root+'/'+classname+'/') if os.path.isfile(os.path.join(root+'/'+classname+'/', item))])
         imfolder = ImageFolder(root=root, transform=self.transform)
         array = np.random.choice(number_of_files, count_of_choices)
         print(array)
