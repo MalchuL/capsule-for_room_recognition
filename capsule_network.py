@@ -22,7 +22,6 @@ BATCH_SIZE = 100
 NUM_CLASSES = 5
 NUM_EPOCHS = 500
 NUM_ROUTING_ITERATIONS = 3
-T = 0.8
 
 
 def pred(path, dest):
@@ -59,7 +58,7 @@ def eval(x):
 
 def softmax(input, dim=1):
     transposed_input = input.transpose(dim, len(input.size()) - 1)
-    softmaxed_output = F.softmax(1 / T * transposed_input.contiguous().view(-1, transposed_input.size(-1)), dim=-1)
+    softmaxed_output = F.softmax(transposed_input.contiguous().view(-1, transposed_input.size(-1)), dim=-1)
     return softmaxed_output.view(*transposed_input.size()).transpose(dim, len(input.size()) - 1)
 
 
@@ -233,7 +232,7 @@ class CapsuleLoss(nn.Module):
 
 if __name__ == "__main__":
     from torch.autograd import Variable
-    from torch.optim import Adam
+    from torch.optim import RMSprop
     #from tqdm import tqdm
     #import torchnet as tnt
     model = CapsuleNet()
@@ -243,7 +242,7 @@ if __name__ == "__main__":
 
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
-    optimizer = Adam(model.parameters(),lr=1e-5)
+    optimizer = RMSprop(model.parameters(),lr=1e-4)
 
     capsule_loss = CapsuleLoss()
 
@@ -296,7 +295,7 @@ if __name__ == "__main__":
                 print("start testing")
                 loss = 0
 
-                input, output = get_test_batch(iteration, batch_size)
+                input, output = get_test_batch(iteration, 10)
                 if True:
                     input, output = input.cuda(), output
 
@@ -305,11 +304,9 @@ if __name__ == "__main__":
 
                     current_loss = loss.item()
                     print('test loss', current_loss)
-                    loss += current_loss
 
 
 
-                print(loss)
             for iteration in range(100):
 
                 input, output = get_batch_func(batch_size)
