@@ -321,9 +321,19 @@ if __name__ == "__main__":
 
                 del loss
 
+    import argparse
+    parser = argparse.ArgumentParser(description='capsules')
 
-    pred('./test/', 'result.txt')
-    #train()
+    parser.add_argument('--use_eval', default='0', type=int,
+                        help='0 - eval, 1 - train')
+
+    FLAGS = parser.parse_args()
+
+    if FLAGS.use_eval == 0:
+        pred('./test/', 'result.txt')
+    else:
+        #pred('./test/', 'result.txt')
+        train()
 
 
 
