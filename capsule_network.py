@@ -54,7 +54,6 @@ def define(label):
 def eval(x):
     with torch.no_grad():
         predicted, _ = model(x)
-        print(predicted.size())
         print(predicted)
         print(np.argmax(predicted, axis=0))
         return np.argmax(predicted, axis=0)
