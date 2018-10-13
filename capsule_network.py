@@ -238,7 +238,7 @@ if __name__ == "__main__":
 
         return loss, classes
 
-    def train(path_to_save='./model.cktp', batch_size=30):
+    def train(path_to_save='./model.cktp', batch_size=15):
         def get_batch_func(batch_size):
             data, output = dataset.get_train_batch(batch_size)
             return data,torch.from_numpy(np.array(output)).type(torch.LongTensor)
