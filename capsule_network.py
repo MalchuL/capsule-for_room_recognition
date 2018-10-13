@@ -202,7 +202,8 @@ class CapsuleNet(nn.Module):
         x = self.primary_capsules(x)
         x = self.digit_capsules(x)
         print(x.size())
-        x = x.squeeze().transpose(0, 1)
+        bs, ch, cap = x.size()[1], x.size()[0], x.size()[4]
+        x = x.view(ch,bs,cap).transpose(0, 1)
 
         classes = (x ** 2).sum(dim=-1) ** 0.5
         classes = F.softmax(classes, dim=-1)
