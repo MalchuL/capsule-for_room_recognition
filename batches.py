@@ -6,8 +6,7 @@ import torchvision.transforms as tr
 from torchvision.transforms import *
 import torch.utils.data
 from torchvision.datasets import ImageFolder
-from sklearn.preprocessing import OneHotEncoder
-from matplotlib import pyplot as plt
+
 
 
 class HackatonDataset(torch.utils.data.Dataset):
