@@ -44,7 +44,6 @@ class HackatonDataset(torch.utils.data.Dataset):
         number_of_files = len([item for item in os.listdir(root+'/'+classname+'/') if os.path.isfile(os.path.join(root+'/'+classname+'/', item))])
         imfolder = ImageFolder(root=root, transform=self.transform)
         array = np.random.choice(number_of_files, count_of_choices)
-        print(array)
         for element in array:
             x=imfolder.__getitem__(element)
             X.append(x[0])
@@ -52,7 +51,7 @@ class HackatonDataset(torch.utils.data.Dataset):
             Y.append(int(y))
         x=torch.stack(X, 0).type(torch.FloatTensor)
         x.requires_grad=False
-        return X, Y
+        return x, Y
 
     def get_train_batch(self, batch_size):
         X, Y=[],[]
@@ -61,4 +60,5 @@ class HackatonDataset(torch.utils.data.Dataset):
         X, Y=self.get_classes('2', batch_size//5, X, Y)
         X, Y=self.get_classes('3', batch_size//5, X, Y)
         X, Y=self.get_classes('4', batch_size//5, X, Y)
+        X = torch.cat(X,dim=0)
         return X, Y
