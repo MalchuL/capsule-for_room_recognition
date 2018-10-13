@@ -159,12 +159,9 @@ class CapsuleNet(nn.Module):
         x = self.Mixed_7b(x)
         # 8 x 8 x 2048
         x = self.Mixed_7c(x)
-        print(x.size())
         x = F.selu(self.conv1(x), inplace=True)
         x = F.selu(self.conv2(x), inplace=True)
-        print(x.size())
         x = self.primary_capsules(x)
-        print(x.size())
         x = self.digit_capsules(x).squeeze().transpose(0, 1)
 
         classes = (x ** 2).sum(dim=-1) ** 0.5
@@ -188,10 +185,8 @@ class CapsuleLoss(nn.Module):
     def forward(self, images, labels, classes, reconstructions):
         left = F.relu(0.9 - classes, inplace=True) ** 2
         right = F.relu(classes - 0.1, inplace=True) ** 2
-        print(images.size(),reconstructions.size())
         margin_loss = labels * left + 0.5 * (1. - labels) * right
         margin_loss = margin_loss.sum()
-        print(torch.numel(images), torch.numel(reconstructions))
         assert torch.numel(images) == torch.numel(reconstructions)
         images = images.view(reconstructions.size()[0], -1)
         reconstruction_loss = self.reconstruction_loss(reconstructions, images)
@@ -233,7 +228,7 @@ if __name__ == "__main__":
             classes, reconstructions = model(data, labels)
         else:
             classes, reconstructions = model(data)
-
+        print(labels,classes)
         loss = capsule_loss(data, labels, classes, reconstructions)
 
         return loss, classes
