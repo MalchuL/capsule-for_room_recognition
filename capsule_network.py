@@ -13,6 +13,10 @@ from torch import nn
 import numpy as np
 import torchvision
 import batches
+import fnmatch
+import PIL.Image
+import torchvision.transforms as tr
+import os
 
 BATCH_SIZE = 100
 NUM_CLASSES = 5
@@ -20,9 +24,42 @@ NUM_EPOCHS = 500
 NUM_ROUTING_ITERATIONS = 3
 T = 0.8
 
+
+def pred(path, dest):
+    dirs = os.listdir(path)
+    preprocess = tr.Compose([tr.Resize((299, 299)), tr.ToTensor()])
+    f = open(dest, "w")
+    for file in dirs:
+        if fnmatch.fnmatch(file, '*.jpg'):
+            img = PIL.Image.open(path + file)
+            x = preprocess(img.convert('RGB'))
+            x = torch.stack([x], 0).type(torch.FloatTensor)
+            x.requires_grad = False
+            res = eval(x)
+            f.write(file + ' ' + define(res) + '\n')
+    f.close()
+
+
+def define(label):
+    if (label == 0):
+        return "Gostinnaya komnata"
+    elif (label == 1):
+        return "Kuhnya"
+    elif (label == 2):
+        return "Sanuzel"
+    elif (label == 3):
+        return "Spalnya"
+    else:
+        return "Ne raspoznano"
+
+def eval(x):
+    with torch.no_grad():
+        predicted=model(x)
+        return np.argmax(predicted, axis=1)
+
 def softmax(input, dim=1):
     transposed_input = input.transpose(dim, len(input.size()) - 1)
-    softmaxed_output = F.softmax(1/T * transposed_input.contiguous().view(-1, transposed_input.size(-1)), dim=-1)
+    softmaxed_output = F.softmax(1 / T * transposed_input.contiguous().view(-1, transposed_input.size(-1)), dim=-1)
     return softmaxed_output.view(*transposed_input.size()).transpose(dim, len(input.size()) - 1)
 
 
@@ -288,7 +325,8 @@ if __name__ == "__main__":
                 del loss
 
 
-    train()
+    pred('./test/', 'result.txt')
+    #train()
 
 
 
