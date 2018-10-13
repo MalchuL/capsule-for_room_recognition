@@ -18,11 +18,11 @@ BATCH_SIZE = 100
 NUM_CLASSES = 5
 NUM_EPOCHS = 500
 NUM_ROUTING_ITERATIONS = 3
-
+T = 0.8
 
 def softmax(input, dim=1):
     transposed_input = input.transpose(dim, len(input.size()) - 1)
-    softmaxed_output = F.softmax(transposed_input.contiguous().view(-1, transposed_input.size(-1)), dim=-1)
+    softmaxed_output = F.softmax(1/T * transposed_input.contiguous().view(-1, transposed_input.size(-1)), dim=-1)
     return softmaxed_output.view(*transposed_input.size()).transpose(dim, len(input.size()) - 1)
 
 
@@ -206,7 +206,7 @@ if __name__ == "__main__":
 
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
-    optimizer = Adam(model.parameters(),lr=5e-6)
+    optimizer = Adam(model.parameters(),lr=1e-5)
 
     capsule_loss = CapsuleLoss()
 
