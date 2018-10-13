@@ -203,11 +203,10 @@ if __name__ == "__main__":
     from torch.optim import Adam
     #from tqdm import tqdm
     #import torchnet as tnt
-    x = torch.ones(2,3,299,299).cuda()
     model = CapsuleNet()
     # model.load_state_dict(torch.load('epochs/epoch_327.pt'))
     model = model.cuda()
-    model(x)
+
 
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
