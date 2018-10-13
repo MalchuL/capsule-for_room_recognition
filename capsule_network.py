@@ -322,8 +322,8 @@ if __name__ == "__main__":
                 del loss
 
 
-    #pred('./test/', 'result.txt')
-    train()
+    pred('./test/', 'result.txt')
+    #train()
 
 
 
