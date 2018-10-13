@@ -204,6 +204,7 @@ class CapsuleNet(nn.Module):
         classes = F.softmax(classes, dim=-1)
 
         if y is None:
+            print(classes.size())
             # In all batches, get the most active capsule.
             if len(classes.size())==2:
                 classes= classes.unsqueeze(0)
