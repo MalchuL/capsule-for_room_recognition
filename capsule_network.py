@@ -206,7 +206,7 @@ if __name__ == "__main__":
 
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
-    optimizer = RMSprop(model.parameters(),lr=1e-5)
+    optimizer = RMSprop(model.parameters(),lr=1e-4)
 
     capsule_loss = CapsuleLoss()
 
