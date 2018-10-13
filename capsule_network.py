@@ -52,7 +52,6 @@ def define(label):
         return "Ne raspoznano"
 
 def eval(x):
-    model = model.eval()
     with torch.no_grad():
         predicted=model(x)
         print(predicted.size())
