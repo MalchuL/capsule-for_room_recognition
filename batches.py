@@ -49,16 +49,15 @@ class HackatonDataset(torch.utils.data.Dataset):
             X.append(x[0])
             y=classname
             Y.append(int(y))
-        x=torch.stack(X, 0).type(torch.FloatTensor)
-        x.requires_grad=False
-        return x, Y
+
+        return X, Y
 
     def get_train_batch(self, batch_size):
         X, Y=[],[]
-        X, Y=self.get_classes('0', batch_size//5, X, Y)
-        X, Y=self.get_classes('1', batch_size//5, X, Y)
-        X, Y=self.get_classes('2', batch_size//5, X, Y)
-        X, Y=self.get_classes('3', batch_size//5, X, Y)
-        X, Y=self.get_classes('4', batch_size//5, X, Y)
-        X = torch.cat(X,dim=0)
+        self.get_classes('0', batch_size//5, X, Y)
+        self.get_classes('1', batch_size//5, X, Y)
+        self.get_classes('2', batch_size//5, X, Y)
+        self.get_classes('3', batch_size//5, X, Y)
+        self.get_classes('4', batch_size//5, X, Y)
+        X = torch.stack(X, 0).type(torch.FloatTensor)
         return X, Y
