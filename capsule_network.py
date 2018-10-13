@@ -12,6 +12,7 @@ import torch.nn.functional as F
 from torch import nn
 import numpy as np
 import torchvision
+import batches
 
 BATCH_SIZE = 100
 NUM_CLASSES = 5
@@ -238,10 +239,12 @@ if __name__ == "__main__":
 
     def train(path_to_save='./model.cktp', batch_size=30):
         def get_batch_func(batch_size):
-            return torch.ones(batch_size,3,299,299),torch.from_numpy(np.array([0,2,2,3,4])).type(torch.LongTensor)
+            data, output = batches.get_train_batch(batch_size)
+            return data,torch.from_numpy(np.array(output)).type(torch.LongTensor)
 
         def get_test_batch(iterations, batch_size):
-            return torch.ones(batch_size,3,299,299),torch.from_numpy(np.array([0,2,2,3,4])).type(torch.LongTensor)
+            data, output = batches.get_train_batch(batch_size)
+            return data, torch.from_numpy(np.array(output)).type(torch.LongTensor)
 
         def save():
             torch.save(model.state_dict(), path_to_save)
