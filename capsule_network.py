@@ -215,6 +215,7 @@ if __name__ == "__main__":
     capsule_loss = CapsuleLoss()
 
 
+    dataset = batches.HackatonDataset('./datasets','.jpg')
 
     def processor(sample):
         data, labels, training = sample
@@ -238,11 +239,11 @@ if __name__ == "__main__":
 
     def train(path_to_save='./model.cktp', batch_size=30):
         def get_batch_func(batch_size):
-            data, output = batches.get_train_batch(batch_size)
+            data, output = dataset.get_train_batch(batch_size)
             return data,torch.from_numpy(np.array(output)).type(torch.LongTensor)
 
         def get_test_batch(iterations, batch_size):
-            data, output = batches.get_train_batch(batch_size)
+            data, output = dataset.get_train_batch(batch_size)
             return data, torch.from_numpy(np.array(output)).type(torch.LongTensor)
 
         def save():
