@@ -191,7 +191,7 @@ class CapsuleLoss(nn.Module):
         images = images.view(reconstructions.size()[0], -1)
         reconstruction_loss = self.reconstruction_loss(reconstructions, images)
 
-        return (margin_loss + 0.05 * self.loss(classes,labels.type(torch.FloatTensor).cuda()) + 0.0005 * reconstruction_loss) / images.size(0)
+        return (margin_loss + 0.05 * self.loss(classes,labels.type(torch.LongTensor).cuda()) + 0.0005 * reconstruction_loss) / images.size(0)
 
 
 if __name__ == "__main__":
