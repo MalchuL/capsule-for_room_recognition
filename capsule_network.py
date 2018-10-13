@@ -180,7 +180,6 @@ class CapsuleLoss(nn.Module):
     def __init__(self):
         super(CapsuleLoss, self).__init__()
         self.reconstruction_loss = nn.MSELoss(size_average=False)
-        self.loss = nn.CrossEntropyLoss()
 
     def forward(self, images, labels, classes, reconstructions):
         left = F.relu(0.9 - classes, inplace=True) ** 2
@@ -191,7 +190,7 @@ class CapsuleLoss(nn.Module):
         images = images.view(reconstructions.size()[0], -1)
         reconstruction_loss = self.reconstruction_loss(reconstructions, images)
 
-        return (margin_loss + 0.05 * self.loss(classes,labels.type(torch.LongTensor).cuda()) + 0.0005 * reconstruction_loss) / images.size(0)
+        return (margin_loss + 0.0005 * reconstruction_loss) / images.size(0)
 
 
 if __name__ == "__main__":
