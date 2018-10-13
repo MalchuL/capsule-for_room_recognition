@@ -11,9 +11,10 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 import numpy as np
+import torchvision
 
 BATCH_SIZE = 100
-NUM_CLASSES = 10
+NUM_CLASSES = 5
 NUM_EPOCHS = 500
 NUM_ROUTING_ITERATIONS = 3
 
@@ -83,11 +84,30 @@ class CapsuleLayer(nn.Module):
 class CapsuleNet(nn.Module):
     def __init__(self):
         super(CapsuleNet, self).__init__()
+        inception = torchvision.models.inception_v3(pretrained=True)
+        inception.requires_grad = False
+        self.Conv2d_1a_3x3 = inception.Conv2d_1a_3x3
+        self.Conv2d_2a_3x3 = inception.Conv2d_2a_3x3
+        self.Conv2d_2b_3x3 = inception.Conv2d_2b_3x3
+        self.Conv2d_3b_1x1 = inception.Conv2d_3b_1x1
+        self.Conv2d_4a_3x3 = inception.Conv2d_4a_3x3
+        self.Mixed_5b = inception.Mixed_5b
+        self.Mixed_5c = inception.Mixed_5c
+        self.Mixed_5d = inception.Mixed_5d
+        self.Mixed_6a = inception.Mixed_6a
+        self.Mixed_6b = inception.Mixed_6b
+        self.Mixed_6c = inception.Mixed_6c
+        self.Mixed_6d = inception.Mixed_6d
+        self.Mixed_6e = inception.Mixed_6e
+        self.Mixed_7a = inception.Mixed_7a
+        self.Mixed_7b = inception.Mixed_7b
+        self.Mixed_7c = inception.Mixed_7c
 
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=256, kernel_size=9, stride=1)
+        self.conv1 = nn.Conv2d(in_channels=2048, out_channels=1024, kernel_size=3, stride=1)
+        self.conv2 = nn.Conv2d(in_channels=1024, out_channels=256, kernel_size=1, stride=1)
         self.primary_capsules = CapsuleLayer(num_capsules=8, num_route_nodes=-1, in_channels=256, out_channels=32,
-                                             kernel_size=9, stride=2)
-        self.digit_capsules = CapsuleLayer(num_capsules=NUM_CLASSES, num_route_nodes=32 * 6 * 6, in_channels=8,
+                                             kernel_size=3, stride=1)
+        self.digit_capsules = CapsuleLayer(num_capsules=NUM_CLASSES, num_route_nodes=512, in_channels=8,
                                            out_channels=16)
 
         self.decoder = nn.Sequential(
@@ -100,8 +120,50 @@ class CapsuleNet(nn.Module):
         )
 
     def forward(self, x, y=None):
-        x = F.relu(self.conv1(x), inplace=True)
+
+        # 299 x 299 x 3
+        x = self.Conv2d_1a_3x3(x)
+        # 149 x 149 x 32
+        x = self.Conv2d_2a_3x3(x)
+        # 147 x 147 x 32
+        x = self.Conv2d_2b_3x3(x)
+        # 147 x 147 x 64
+        x = F.max_pool2d(x, kernel_size=3, stride=2)
+        # 73 x 73 x 64
+        x = self.Conv2d_3b_1x1(x)
+        # 73 x 73 x 80
+        x = self.Conv2d_4a_3x3(x)
+        # 71 x 71 x 192
+        x = F.max_pool2d(x, kernel_size=3, stride=2)
+        # 35 x 35 x 192
+        print('первый рубеж пройден')
+        x = self.Mixed_5b(x)
+        # 35 x 35 x 256
+        x = self.Mixed_5c(x)
+        # 35 x 35 x 288
+        x = self.Mixed_5d(x)
+        # 35 x 35 x 288
+        x = self.Mixed_6a(x)
+        # 17 x 17 x 768
+        x = self.Mixed_6b(x)
+        # 17 x 17 x 768
+        x = self.Mixed_6c(x)
+        # 17 x 17 x 768
+        x = self.Mixed_6d(x)
+        # 17 x 17 x 768
+        x = self.Mixed_6e(x)
+        # 17 x 17 x 768
+        x = self.Mixed_7a(x)
+        # 8 x 8 x 1280
+        x = self.Mixed_7b(x)
+        # 8 x 8 x 2048
+        x = self.Mixed_7c(x)
+        print(x.size())
+        x = F.selu(self.conv1(x), inplace=True)
+        x = F.selu(self.conv2(x), inplace=True)
+        print(x.size())
         x = self.primary_capsules(x)
+        print(x.size())
         x = self.digit_capsules(x).squeeze().transpose(0, 1)
 
         classes = (x ** 2).sum(dim=-1) ** 0.5
@@ -139,52 +201,26 @@ class CapsuleLoss(nn.Module):
 if __name__ == "__main__":
     from torch.autograd import Variable
     from torch.optim import Adam
-    from torchnet.engine import Engine
-    from torchnet.logger import VisdomPlotLogger, VisdomLogger
-    from torchvision.utils import make_grid
-    from torchvision.datasets.mnist import MNIST
-    from tqdm import tqdm
-    import torchnet as tnt
-
+    #from tqdm import tqdm
+    #import torchnet as tnt
+    x = torch.ones(1,3,299,299).cuda()
     model = CapsuleNet()
     # model.load_state_dict(torch.load('epochs/epoch_327.pt'))
-    model.cuda()
+    model = model.cuda()
+    model(x)
 
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
     optimizer = Adam(model.parameters())
 
-    engine = Engine()
-    meter_loss = tnt.meter.AverageValueMeter()
-    meter_accuracy = tnt.meter.ClassErrorMeter(accuracy=True)
-    confusion_meter = tnt.meter.ConfusionMeter(NUM_CLASSES, normalized=True)
-
-    train_loss_logger = VisdomPlotLogger('line', opts={'title': 'Train Loss'})
-    train_error_logger = VisdomPlotLogger('line', opts={'title': 'Train Accuracy'})
-    test_loss_logger = VisdomPlotLogger('line', opts={'title': 'Test Loss'})
-    test_accuracy_logger = VisdomPlotLogger('line', opts={'title': 'Test Accuracy'})
-    confusion_logger = VisdomLogger('heatmap', opts={'title': 'Confusion matrix',
-                                                     'columnnames': list(range(NUM_CLASSES)),
-                                                     'rownames': list(range(NUM_CLASSES))})
-    ground_truth_logger = VisdomLogger('image', opts={'title': 'Ground Truth'})
-    reconstruction_logger = VisdomLogger('image', opts={'title': 'Reconstruction'})
-
     capsule_loss = CapsuleLoss()
 
-
-    def get_iterator(mode):
-        dataset = MNIST(root='./data', download=True, train=mode)
-        data = getattr(dataset, 'train_data' if mode else 'test_data')
-        labels = getattr(dataset, 'train_labels' if mode else 'test_labels')
-        tensor_dataset = tnt.dataset.TensorDataset([data, labels])
-
-        return tensor_dataset.parallel(batch_size=BATCH_SIZE, num_workers=4, shuffle=mode)
 
 
     def processor(sample):
         data, labels, training = sample
 
-        data = augmentation(data.unsqueeze(1).float() / 255.0)
+
         labels = torch.LongTensor(labels)
 
         labels = torch.eye(NUM_CLASSES).index_select(dim=0, index=labels)
@@ -201,67 +237,64 @@ if __name__ == "__main__":
 
         return loss, classes
 
+    def train(model,path_to_save='./model.cktp',batch_size=30):
+        def get_batch_func(batch_size):
+            return torch.ones(batch_size,3,299,299),[0,2,2,3,4]
 
-    def reset_meters():
-        meter_accuracy.reset()
-        meter_loss.reset()
-        confusion_meter.reset()
+        def get_test_batch(iterations,batch_size):
+            return torch.ones(batch_size,3,299,299),[0,2,2,3,2]
+
+        def save(self):
+            torch.save(model.state_dict(), path_to_save)
+
+        def resume(self):
+            try:
+                model.load_state_dict(torch.load(path_to_save))
+            except Exception as ex:
+                print('no saved model: ', ex)
+
+        resume()
+        for epoch in range(10000):
+
+            if epoch > 0 and get_test_batch:
+                save()
+                print("start testing")
+                loss = 0
+
+                input, output = get_test_batch(iteration, batch_size)
+                if True:
+                    input, output = input.cuda(), output.cuda()
+
+                with torch.no_grad():
+                    loss, classes = processor([input, output, True])
+
+                    current_loss = loss.item()
+                    print('test loss', current_loss)
+                    loss += current_loss
 
 
-    def on_sample(state):
-        state['sample'].append(state['train'])
+
+                print(loss)
+            for iteration in range(100):
+
+                input, output = get_batch_func(batch_size)
+                if True:
+                    input, output = input.cuda(), output.cuda()
+
+                loss, classes = processor([input,output,True])
+                print(loss.item())
+
+                loss.backward()
+                optimizer.step()
+
+                del loss
 
 
-    def on_forward(state):
-        meter_accuracy.add(state['output'].data, torch.LongTensor(state['sample'][1]))
-        confusion_meter.add(state['output'].data, torch.LongTensor(state['sample'][1]))
-        meter_loss.add(state['loss'].item())
 
 
-    def on_start_epoch(state):
-        reset_meters()
-        state['iterator'] = tqdm(state['iterator'])
 
 
-    def on_end_epoch(state):
-        print('[Epoch %d] Training Loss: %.4f (Accuracy: %.2f%%)' % (
-            state['epoch'], meter_loss.value()[0], meter_accuracy.value()[0]))
 
-        train_loss_logger.log(state['epoch'], meter_loss.value()[0])
-        train_error_logger.log(state['epoch'], meter_accuracy.value()[0])
 
-        reset_meters()
 
-        engine.test(processor, get_iterator(False))
-        test_loss_logger.log(state['epoch'], meter_loss.value()[0])
-        test_accuracy_logger.log(state['epoch'], meter_accuracy.value()[0])
-        confusion_logger.log(confusion_meter.value())
 
-        print('[Epoch %d] Testing Loss: %.4f (Accuracy: %.2f%%)' % (
-            state['epoch'], meter_loss.value()[0], meter_accuracy.value()[0]))
-
-        torch.save(model.state_dict(), 'epochs/epoch_%d.pt' % state['epoch'])
-
-        # Reconstruction visualization.
-
-        test_sample = next(iter(get_iterator(False)))
-
-        ground_truth = (test_sample[0].unsqueeze(1).float() / 255.0)
-        _, reconstructions = model(Variable(ground_truth).cuda())
-        reconstruction = reconstructions.cpu().view_as(ground_truth).data
-
-        ground_truth_logger.log(
-            make_grid(ground_truth, nrow=int(BATCH_SIZE ** 0.5), normalize=True, range=(0, 1)).numpy())
-        reconstruction_logger.log(
-            make_grid(reconstruction, nrow=int(BATCH_SIZE ** 0.5), normalize=True, range=(0, 1)).numpy())
-
-    # def on_start(state):
-    #     state['epoch'] = 327
-    #
-    # engine.hooks['on_start'] = on_start
-    engine.hooks['on_sample'] = on_sample
-    engine.hooks['on_forward'] = on_forward
-    engine.hooks['on_start_epoch'] = on_start_epoch
-    engine.hooks['on_end_epoch'] = on_end_epoch
-
-    engine.train(processor, get_iterator(True), maxepoch=NUM_EPOCHS, optimizer=optimizer)
