@@ -200,13 +200,8 @@ class CapsuleNet(nn.Module):
         x = F.selu(self.conv1(x), inplace=True)
         x = F.selu(self.conv2(x), inplace=True)
         x = self.primary_capsules(x)
-        x = self.digit_capsules(x)
-        print(x.size())
-        x = x.squeeze()
-        if len(x.size())==2:
-            x=x.unsqueeze(1)
-        x.transpose(0, 1)
-        print(x.size())
+        x = self.digit_capsules(x).squeeze().transpose(0, 1)
+
         classes = (x ** 2).sum(dim=-1) ** 0.5
         classes = F.softmax(classes, dim=-1)
 
