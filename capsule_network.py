@@ -32,7 +32,7 @@ def pred(path, dest):
         if fnmatch.fnmatch(file, '*.jpg'):
             img = PIL.Image.open(path + file)
             x = preprocess(img.convert('RGB'))
-            x = torch.stack([x], 0).type(torch.FloatTensor).cuda()
+            x = torch.stack([x,x], 0).type(torch.FloatTensor).cuda()
             x.requires_grad = False
             res = eval(x)
             f.write(file + ' ' + define(res) + '\n')
