@@ -190,7 +190,7 @@ class CapsuleLoss(nn.Module):
 
         margin_loss = labels * left + 0.5 * (1. - labels) * right
         margin_loss = margin_loss.sum()
-
+        print(torch.numel(images), torch.numel(reconstructions))
         assert torch.numel(images) == torch.numel(reconstructions)
         images = images.view(reconstructions.size()[0], -1)
         reconstruction_loss = self.reconstruction_loss(reconstructions, images)
