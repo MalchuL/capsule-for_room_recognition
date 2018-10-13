@@ -198,17 +198,17 @@ class CapsuleNet(nn.Module):
         x = F.selu(self.conv1(x), inplace=True)
         x = F.selu(self.conv2(x), inplace=True)
         x = self.primary_capsules(x)
-        x = self.digit_capsules(x).squeeze().transpose(0, 1)
+        x = self.digit_capsules(x)
+        print(x.size())
+        x = x.squeeze().transpose(0, 1)
 
         classes = (x ** 2).sum(dim=-1) ** 0.5
         classes = F.softmax(classes, dim=-1)
 
         if y is None:
-            print(classes.size())
             # In all batches, get the most active capsule.
             if len(classes.size()) != 2:
                 classes= classes.unsqueeze(0)
-            print(classes.size())
             _, max_length_indices = classes.max(dim=1)
             y = Variable(torch.eye(NUM_CLASSES)).cuda().index_select(dim=0, index=max_length_indices.data)
 
