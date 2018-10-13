@@ -22,7 +22,7 @@ BATCH_SIZE = 100
 NUM_CLASSES = 5
 NUM_EPOCHS = 500
 NUM_ROUTING_ITERATIONS = 3
-
+T = 0.2
 
 def pred(path, dest):
 
@@ -212,7 +212,7 @@ class CapsuleNet(nn.Module):
         x = x.view(ch,bs,cap).transpose(0, 1)
 
         classes = (x ** 2).sum(dim=-1) ** 0.5
-        classes = F.softmax(classes, dim=-1)
+        classes = F.softmax(1/T*classes, dim=-1)
 
         if y is None:
             # In all batches, get the most active capsule.
