@@ -34,7 +34,7 @@ def pred(path, dest):
         dirs = os.listdir(os.path.join(path,folder))
         for file in dirs:
             if fnmatch.fnmatch(file, '*.jpg'):
-                img = PIL.Image.open(path + file)
+                img = PIL.Image.open(os.join(path,folder,file))
                 x = preprocess(img.convert('RGB'))
                 x = torch.stack([x], 0).type(torch.FloatTensor).cuda()
                 x.requires_grad = False
