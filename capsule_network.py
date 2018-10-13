@@ -116,7 +116,8 @@ class CapsuleNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(512, 1024),
             nn.ReLU(inplace=True),
-            nn.Linear(1024, 784),
+            #reconstruction size
+            nn.Linear(1024, 3*299*299),
             nn.Sigmoid()
         )
 
