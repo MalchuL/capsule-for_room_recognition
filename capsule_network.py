@@ -22,7 +22,7 @@ BATCH_SIZE = 100
 NUM_CLASSES = 5
 NUM_EPOCHS = 500
 NUM_ROUTING_ITERATIONS = 3
-T = 0.2
+T = 0.01
 
 def pred(path, dest):
 
