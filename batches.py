@@ -44,7 +44,6 @@ class HackatonDataset(torch.utils.data.Dataset):
         number_of_files = len([item for item in os.listdir(root+'/'+classname+'/') if os.path.isfile(os.path.join(root+'/'+classname+'/', item))])
         imfolder = ImageFolder(root=root, transform=self.transform)
         array = np.random.choice(number_of_files, count_of_choices)
-        print(number_of_files[array[0]])
         for element in array:
             x=imfolder.__getitem__(element)
             X.append(x[0])
