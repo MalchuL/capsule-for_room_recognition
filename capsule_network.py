@@ -136,7 +136,6 @@ class CapsuleNet(nn.Module):
         # 71 x 71 x 192
         x = F.max_pool2d(x, kernel_size=3, stride=2)
         # 35 x 35 x 192
-        print('первый рубеж пройден')
         x = self.Mixed_5b(x)
         # 35 x 35 x 256
         x = self.Mixed_5c(x)
@@ -203,7 +202,7 @@ if __name__ == "__main__":
     from torch.optim import Adam
     #from tqdm import tqdm
     #import torchnet as tnt
-    x = torch.ones(1,3,299,299).cuda()
+    x = torch.ones(2,3,299,299).cuda()
     model = CapsuleNet()
     # model.load_state_dict(torch.load('epochs/epoch_327.pt'))
     model = model.cuda()
@@ -237,17 +236,17 @@ if __name__ == "__main__":
 
         return loss, classes
 
-    def train(model,path_to_save='./model.cktp',batch_size=30):
+    def train(path_to_save='./model.cktp', batch_size=30):
         def get_batch_func(batch_size):
-            return torch.ones(batch_size,3,299,299),[0,2,2,3,4]
+            return torch.ones(batch_size,3,299,299),torch.from_numpy(np.array([0,2,2,3,4])).type(torch.LongTensor)
 
-        def get_test_batch(iterations,batch_size):
-            return torch.ones(batch_size,3,299,299),[0,2,2,3,2]
+        def get_test_batch(iterations, batch_size):
+            return torch.ones(batch_size,3,299,299),torch.from_numpy(np.array([0,2,2,3,4])).type(torch.LongTensor)
 
-        def save(self):
+        def save():
             torch.save(model.state_dict(), path_to_save)
 
-        def resume(self):
+        def resume():
             try:
                 model.load_state_dict(torch.load(path_to_save))
             except Exception as ex:
@@ -263,7 +262,7 @@ if __name__ == "__main__":
 
                 input, output = get_test_batch(iteration, batch_size)
                 if True:
-                    input, output = input.cuda(), output.cuda()
+                    input, output = input.cuda(), output
 
                 with torch.no_grad():
                     loss, classes = processor([input, output, True])
@@ -279,7 +278,7 @@ if __name__ == "__main__":
 
                 input, output = get_batch_func(batch_size)
                 if True:
-                    input, output = input.cuda(), output.cuda()
+                    input, output = input.cuda(), output
 
                 loss, classes = processor([input,output,True])
                 print(loss.item())
@@ -290,7 +289,7 @@ if __name__ == "__main__":
                 del loss
 
 
-
+    train()
 
 
 
