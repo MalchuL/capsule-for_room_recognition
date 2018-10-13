@@ -211,7 +211,7 @@ if __name__ == "__main__":
 
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
-    optimizer = Adam(model.parameters())
+    optimizer = Adam(model.parameters(),lr=1e-4)
 
     capsule_loss = CapsuleLoss()
 
