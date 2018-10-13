@@ -232,7 +232,7 @@ class CapsuleLoss(nn.Module):
 
 if __name__ == "__main__":
     from torch.autograd import Variable
-    from torch.optim import RMSprop
+    from torch.optim import Adam
     #from tqdm import tqdm
     #import torchnet as tnt
     model = CapsuleNet()
@@ -242,7 +242,7 @@ if __name__ == "__main__":
 
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
-    optimizer = RMSprop(model.parameters(),lr=1e-4)
+    optimizer = Adam(model.parameters(),lr=1e-5)
 
     capsule_loss = CapsuleLoss()
 
