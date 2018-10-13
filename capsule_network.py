@@ -22,7 +22,7 @@ BATCH_SIZE = 100
 NUM_CLASSES = 5
 NUM_EPOCHS = 500
 NUM_ROUTING_ITERATIONS = 3
-T = 0.01
+T = 0.001
 
 def pred(path, dest):
 
@@ -30,8 +30,8 @@ def pred(path, dest):
 
     f = open(dest, "w")
 
-    for folder in os.listdir(path):
-        dirs = os.listdir(os.path.join(path,folder))
+    for folder in sorted(os.listdir(path)):
+        dirs = sorted(os.listdir(os.path.join(path,folder)))
         for file in dirs:
             if fnmatch.fnmatch(file, '*.jpg'):
                 img = PIL.Image.open(os.path.join(path,folder,file))
