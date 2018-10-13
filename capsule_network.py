@@ -25,17 +25,21 @@ NUM_ROUTING_ITERATIONS = 3
 
 
 def pred(path, dest):
-    dirs = os.listdir(path)
+
     preprocess = tr.Compose([tr.Resize((299, 299)), tr.ToTensor()])
+
     f = open(dest, "w")
-    for file in dirs:
-        if fnmatch.fnmatch(file, '*.jpg'):
-            img = PIL.Image.open(path + file)
-            x = preprocess(img.convert('RGB'))
-            x = torch.stack([x], 0).type(torch.FloatTensor).cuda()
-            x.requires_grad = False
-            res = eval(x)
-            f.write(file + ' ' + define(res) + '\n')
+
+    for folder in os.listdir(path):
+        dirs = os.listdir(os.path.join(path,folder))
+        for file in dirs:
+            if fnmatch.fnmatch(file, '*.jpg'):
+                img = PIL.Image.open(path + file)
+                x = preprocess(img.convert('RGB'))
+                x = torch.stack([x], 0).type(torch.FloatTensor).cuda()
+                x.requires_grad = False
+                res = eval(x)
+                f.write(folder+'/' + file + ' ' + define(res) + '\n')
     f.close()
 
 
