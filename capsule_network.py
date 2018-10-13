@@ -196,7 +196,7 @@ class CapsuleLoss(nn.Module):
 
 if __name__ == "__main__":
     from torch.autograd import Variable
-    from torch.optim import Adam
+    from torch.optim import RMSprop
     #from tqdm import tqdm
     #import torchnet as tnt
     model = CapsuleNet()
@@ -206,7 +206,7 @@ if __name__ == "__main__":
 
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
-    optimizer = Adam(model.parameters(),lr=1e-5)
+    optimizer = RMSprop(model.parameters(),lr=1e-5)
 
     capsule_loss = CapsuleLoss()
 
@@ -259,7 +259,7 @@ if __name__ == "__main__":
                 print("start testing")
                 loss = 0
 
-                input, output = get_test_batch(iteration, batch_size)
+                input, output = get_test_batch(iteration, 10)
                 if True:
                     input, output = input.cuda(), output
 
@@ -268,11 +268,9 @@ if __name__ == "__main__":
 
                     current_loss = loss.item()
                     print('test loss', current_loss)
-                    loss += current_loss
 
 
 
-                print(loss)
             for iteration in range(100):
 
                 input, output = get_batch_func(batch_size)
