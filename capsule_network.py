@@ -187,7 +187,7 @@ class CapsuleLoss(nn.Module):
     def forward(self, images, labels, classes, reconstructions):
         left = F.relu(0.9 - classes, inplace=True) ** 2
         right = F.relu(classes - 0.1, inplace=True) ** 2
-
+        print(images.size(),reconstructions.size())
         margin_loss = labels * left + 0.5 * (1. - labels) * right
         margin_loss = margin_loss.sum()
         print(torch.numel(images), torch.numel(reconstructions))
