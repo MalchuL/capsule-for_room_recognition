@@ -52,8 +52,10 @@ def define(label):
         return "Ne raspoznano"
 
 def eval(x):
+    model = model.eval()
     with torch.no_grad():
         predicted=model(x)
+        print(predicted.size())
         return np.argmax(predicted, axis=1)
 
 def softmax(input, dim=1):
